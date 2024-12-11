@@ -32,6 +32,7 @@ workflow GATKSVPipelineSingleSample {
     # Batch info
     String batch
     String sample_id
+    Array[String] ref_samples
 
     # Define raw callers to use
     # Overrides presence of case_*_vcf parameters below
@@ -54,7 +55,6 @@ workflow GATKSVPipelineSingleSample {
 
     # Global files
     File ref_ped_file
-    File ref_samples_list
     File genome_file
     File primary_contigs_list
     File primary_contigs_fai
@@ -182,14 +182,14 @@ workflow GATKSVPipelineSingleSample {
 
     # gCNV inputs
     File contig_ploidy_model_tar
-    File gcnv_model_tars_list  # list of files, one per line
+    File gcnv_model_tars
 
     # bincov counts files (for cn.mops)
     File ref_panel_bincov_matrix
 
-    File ref_pesr_disc_files_list  # list of files, one per line
-    File ref_pesr_split_files_list  # list of files, one per line
-    File ref_pesr_sd_files_list  # list of files, one per line
+    Array[File] ref_pesr_disc_files
+    Array[File] ref_pesr_split_files
+    Array[File] ref_pesr_sd_files
 
     File? gatk4_jar_override
     Float? gcnv_p_alt
@@ -730,8 +730,6 @@ workflow GATKSVPipelineSingleSample {
     Array[File] wham_vcfs_ = [select_first([case_wham_vcf, GatherSampleEvidence.wham_vcf])]
   }
 
-  Array[String] ref_samples = read_lines(ref_samples_list)
-
   call batchevidence.GatherBatchEvidence as GatherBatchEvidence {
     input:
       batch=batch,
@@ -749,14 +747,14 @@ workflow GATKSVPipelineSingleSample {
       PE_files=[case_pe_file_],
       cytoband=cytobands,
       mei_bed=mei_bed,
-      ref_panel_PE_files=read_lines(ref_pesr_disc_files_list),
+      ref_panel_PE_files=ref_pesr_disc_files,
       SR_files=[case_sr_file_],
-      ref_panel_SR_files=read_lines(ref_pesr_split_files_list),
+      ref_panel_SR_files=ref_pesr_split_files,
       SD_files=[case_sd_file_],
-      ref_panel_SD_files=read_lines(ref_pesr_sd_files_list),
+      ref_panel_SD_files=ref_pesr_sd_files,
       sd_locs_vcf=sd_locs_vcf,
       contig_ploidy_model_tar = contig_ploidy_model_tar,
-      gcnv_model_tars = read_lines(gcnv_model_tars_list),
+      gcnv_model_tars = gcnv_model_tars,
       gatk4_jar_override = gatk4_jar_override,
       run_ploidy = true,
       append_first_sample_to_ped = true,

@@ -113,11 +113,11 @@
 
   "GATKSVPipelineSingleSample.annotation_sv_per_shard" : "5000",
 
-  "GATKSVPipelineSingleSample.ref_samples_list" : {{ ref_panel.samples_list | tojson }},
+  "GATKSVPipelineSingleSample.ref_samples" : {{ ref_panel.samples | tojson }},
   "GATKSVPipelineSingleSample.ref_std_manta_vcf_tar" : {{ ref_panel.std_manta_vcf_tar | tojson }},
   "GATKSVPipelineSingleSample.ref_std_wham_vcf_tar" : {{ ref_panel.std_wham_vcf_tar | tojson }},
-  "GATKSVPipelineSingleSample.ref_pesr_disc_files_list" : {{ ref_panel.PE_files_list | tojson }},
-  "GATKSVPipelineSingleSample.ref_pesr_split_files_list" : {{ ref_panel.SR_files_list | tojson }},
-  "GATKSVPipelineSingleSample.ref_pesr_sd_files_list" : {{ ref_panel.SD_files_list | tojson }},
-  "GATKSVPipelineSingleSample.gcnv_model_tars_list" : {{ ref_panel.gcnv_model_tars_list | tojson }}
+  "GATKSVPipelineSingleSample.ref_pesr_disc_files" : {{ ref_panel.PE_files | tojson }},
+  "GATKSVPipelineSingleSample.ref_pesr_split_files" : {{ ref_panel.SR_files | tojson }},
+  "GATKSVPipelineSingleSample.ref_pesr_sd_files" : {{ ref_panel.SD_files | tojson }},
+  "GATKSVPipelineSingleSample.gcnv_model_tars" : {{ ref_panel.gcnv_model_tars | tojson }}
 }
