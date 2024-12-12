@@ -182,7 +182,7 @@ workflow GATKSVPipelineSingleSample {
 
     # gCNV inputs
     File contig_ploidy_model_tar
-    File gcnv_model_tars
+    Array[File] gcnv_model_tars
 
     # bincov counts files (for cn.mops)
     File ref_panel_bincov_matrix

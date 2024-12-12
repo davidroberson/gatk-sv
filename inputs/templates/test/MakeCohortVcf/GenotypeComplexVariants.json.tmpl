@@ -11,9 +11,7 @@
   "GenotypeComplexVariants.batches": [
     {{ test_batch.name | tojson }}
   ],
-  "GenotypeComplexVariants.depth_vcfs": [
-    {{ test_batch.regenotyped_depth_vcf | tojson }}
-  ],
+  "GenotypeComplexVariants.depth_vcfs": {{ test_batch.regenotyped_depth_vcf | tojson }},
   "GenotypeComplexVariants.complex_resolve_vcfs": {{ test_batch.complex_resolve_vcfs | tojson }},
   "GenotypeComplexVariants.complex_resolve_vcf_indexes": {{ test_batch.complex_resolve_vcf_indexes | tojson }},
   "GenotypeComplexVariants.ped_file": {{ test_batch.ped_file | tojson }},
