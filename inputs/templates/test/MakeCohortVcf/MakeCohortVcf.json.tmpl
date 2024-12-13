@@ -57,9 +57,7 @@
   "MakeCohortVcf.pesr_vcfs": [
     {{ test_batch.genotyped_pesr_vcf| tojson }}
   ],
-  "MakeCohortVcf.depth_vcfs": [
-    {{ test_batch.regenotyped_depth_vcf | tojson }}
-  ],
+  "MakeCohortVcf.depth_vcfs": {{ test_batch.regenotyped_depth_vcf | tojson }},
   "MakeCohortVcf.depth_gt_rd_sep_files": [
     {{ test_batch.genotype_depth_depth_sepcutoff | tojson }}
   ],
