@@ -32,7 +32,7 @@ workflow GATKSVPipelineSingleSample {
     # Batch info
     String batch
     String sample_id
-    Array[String] ref_samples_list
+    File ref_samples_list
 
     # Define raw callers to use
     # Overrides presence of case_*_vcf parameters below
@@ -693,10 +693,10 @@ workflow GATKSVPipelineSingleSample {
     }
   }
 
-  Array[File] case_counts_file_ = select_first([case_counts_file, GatherSampleEvidence.coverage_counts])
-  Array[File] case_pe_file_ = select_first([case_pe_file, GatherSampleEvidence.pesr_disc])
-  Array[File] case_sr_file_ = select_first([case_sr_file, GatherSampleEvidence.pesr_split])
-  Array[File] case_sd_file_ = select_first([case_sd_file, GatherSampleEvidence.pesr_sd])
+  File case_counts_file_ = select_first([case_counts_file, GatherSampleEvidence.coverage_counts])
+  File case_pe_file_ = select_first([case_pe_file, GatherSampleEvidence.pesr_disc])
+  File case_sr_file_ = select_first([case_sr_file, GatherSampleEvidence.pesr_split])
+  File case_sd_file_ = select_first([case_sd_file, GatherSampleEvidence.pesr_sd])
 
   call evidenceqc.EvidenceQC as EvidenceQC {
     input:
@@ -729,6 +729,8 @@ workflow GATKSVPipelineSingleSample {
   if (use_wham) {
     Array[File] wham_vcfs_ = [select_first([case_wham_vcf, GatherSampleEvidence.wham_vcf])]
   }
+
+  Array[String] ref_samples = read_lines(ref_samples_list)
 
   Array[File] gcnv_model_tars = read_lines(gcnv_model_tars_list)
   Array[File] ref_pesr_disc_files = read_lines(ref_pesr_disc_files_list)
