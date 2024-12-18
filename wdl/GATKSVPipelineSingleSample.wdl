@@ -32,7 +32,7 @@ workflow GATKSVPipelineSingleSample {
     # Batch info
     String batch
     String sample_id
-    Array[String] ref_samples
+    Array[String] ref_samples_list
 
     # Define raw callers to use
     # Overrides presence of case_*_vcf parameters below
@@ -182,14 +182,14 @@ workflow GATKSVPipelineSingleSample {
 
     # gCNV inputs
     File contig_ploidy_model_tar
-    Array[File] gcnv_model_tars
+    File gcnv_model_tars_list
 
     # bincov counts files (for cn.mops)
     File ref_panel_bincov_matrix
 
-    Array[File] ref_pesr_disc_files
-    Array[File] ref_pesr_split_files
-    Array[File] ref_pesr_sd_files
+    File ref_pesr_disc_files_list
+    File ref_pesr_split_files_list
+    File ref_pesr_sd_files_list
 
     File? gatk4_jar_override
     Float? gcnv_p_alt
@@ -693,10 +693,10 @@ workflow GATKSVPipelineSingleSample {
     }
   }
 
-  File case_counts_file_ = select_first([case_counts_file, GatherSampleEvidence.coverage_counts])
-  File case_pe_file_ = select_first([case_pe_file, GatherSampleEvidence.pesr_disc])
-  File case_sr_file_ = select_first([case_sr_file, GatherSampleEvidence.pesr_split])
-  File case_sd_file_ = select_first([case_sd_file, GatherSampleEvidence.pesr_sd])
+  Array[File] case_counts_file_ = select_first([case_counts_file, GatherSampleEvidence.coverage_counts])
+  Array[File] case_pe_file_ = select_first([case_pe_file, GatherSampleEvidence.pesr_disc])
+  Array[File] case_sr_file_ = select_first([case_sr_file, GatherSampleEvidence.pesr_split])
+  Array[File] case_sd_file_ = select_first([case_sd_file, GatherSampleEvidence.pesr_sd])
 
   call evidenceqc.EvidenceQC as EvidenceQC {
     input:
@@ -729,6 +729,11 @@ workflow GATKSVPipelineSingleSample {
   if (use_wham) {
     Array[File] wham_vcfs_ = [select_first([case_wham_vcf, GatherSampleEvidence.wham_vcf])]
   }
+
+  Array[File] gcnv_model_tars = read_lines(gcnv_model_tars_list)
+  Array[File] ref_pesr_disc_files = read_lines(ref_pesr_disc_files_list)
+  Array[File] ref_pesr_split_files = read_lines(ref_pesr_split_files_list)
+  Array[File] ref_pesr_sd_files = read_lines(ref_pesr_sd_files_list)
 
   call batchevidence.GatherBatchEvidence as GatherBatchEvidence {
     input:
