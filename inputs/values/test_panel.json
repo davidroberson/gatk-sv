@@ -2198,7 +2198,7 @@
   "number_regenotyped_file": "gs://fc-7db31904-e674-4d0a-a913-d226a396ed48/submissions/e81c0ff3-cc04-4455-af7f-c060f086c9b0/RegenotypeCNVs/52a2c65d-a930-4bb2-99e6-d38706aa5698/call-MergeList/regeno_num_lines.txt",
   "number_regenotyped_filtered_file": "gs://fc-7db31904-e674-4d0a-a913-d226a396ed48/submissions/e81c0ff3-cc04-4455-af7f-c060f086c9b0/RegenotypeCNVs/52a2c65d-a930-4bb2-99e6-d38706aa5698/call-CombineReassess/CombineReassess/84f3f3a8-0fe4-4994-b9df-0e478780abdf/call-MergeList/regeno_filtered_num_lines.txt",
   "outlier_cutoff_table": "gs://gatk-sv-resources-public/hg38/v0/sv-resources/ref-panel/1KG/v1/module03_outlier_cutoff_table.tsv",
-  "ped_file": "gs://broad-dsde-methods-eph/ped_1kgp_all.ped",
+  "ped_file": "gs://gcp-public-data--broad-references/hg38/v0/sv-resources/ref-panel/1KG/v1/ped/1kg_ref_panel_v1.ped",
   "ploidy_table": "gs://fc-7db31904-e674-4d0a-a913-d226a396ed48/submissions/ed96e9e8-d69d-482a-9820-b56b2e415ea5/JoinRawCalls/fc99f959-e784-4c49-b865-b5c0388b2bb2/call-CreatePloidyTableFromPed/all_batches.ploidy.tsv",
   "qc_definitions": "gs://gatk-sv-ref-panel-1kg/outputs/GATKSVPipelineBatch/38c65ca4-2a07-4805-86b6-214696075fef/ref_panel_1kg.qc_definitions.tsv",
   "raw_sr_background_fail_file": "gs://fc-7db31904-e674-4d0a-a913-d226a396ed48/submissions/6b2ae6b8-42f3-411f-a8be-15628b4ad404/GenotypeBatch/6ddacf44-260e-423c-8b59-488bb0b44dc6/call-GenotypePESRPart2/GenotypePESRPart2/f7f006e4-779d-459f-b029-0bc748aa854d/call-CatFilesFail/all_samples.genotype_SR_part2_background_fail.txt",
