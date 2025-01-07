@@ -80,6 +80,7 @@ workflow GATKSVPipelineSingleSamplePart2 {
 
     # Dockers
     String gatk_docker
+    String gq_recalibrator_gatk_docker
     String sv_base_mini_docker
     String sv_pipeline_docker
     String linux_docker
@@ -152,7 +153,7 @@ workflow GATKSVPipelineSingleSamplePart2 {
       run_qc=run_main_vcf_qc,
       primary_contigs_fai=primary_contigs_fai,
       linux_docker=linux_docker,
-      gatk_docker=gatk_docker,
+      gatk_docker=gq_recalibrator_gatk_docker,
       sv_base_mini_docker=sv_base_mini_docker,
       sv_pipeline_docker=sv_pipeline_docker
   }
