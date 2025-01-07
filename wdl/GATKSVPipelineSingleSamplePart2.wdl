@@ -83,6 +83,9 @@ workflow GATKSVPipelineSingleSamplePart2 {
     String sv_base_mini_docker
     String sv_pipeline_docker
     String linux_docker
+
+    # Do not use
+    Array[File]? NONE_ARRAY_
   }
 
   call rcv.RefineComplexVariants {
@@ -103,16 +106,16 @@ workflow GATKSVPipelineSingleSamplePart2 {
   call jrc.JoinRawCalls {
     input:
       prefix=sample_id,
-      clustered_manta_vcfs=select_all([clustered_manta_vcf]),
-      clustered_manta_vcf_indexes=select_all([clustered_manta_vcf_index]),
-      clustered_melt_vcfs=select_all([clustered_melt_vcf]),
-      clustered_melt_vcf_indexes=select_all([clustered_melt_vcf_index]),
-      clustered_scramble_vcfs=select_all([clustered_scramble_vcf]),
-      clustered_scramble_vcf_indexes=select_all([clustered_scramble_vcf_index]),
-      clustered_wham_vcfs=select_all([clustered_wham_vcf]),
-      clustered_wham_vcf_indexes=select_all([clustered_wham_vcf_index]),
-      clustered_depth_vcfs=select_all([clustered_depth_vcf]),
-      clustered_depth_vcf_indexes=select_all([clustered_depth_vcf_index]),
+      clustered_manta_vcfs=if defined(clustered_manta_vcf) then select_all([clustered_manta_vcf]) else NONE_ARRAY_,
+      clustered_manta_vcf_indexes=if defined(clustered_manta_vcf) then select_all([clustered_manta_vcf_index]) else NONE_ARRAY_,
+      clustered_melt_vcfs=if defined(clustered_manta_vcf) then select_all([clustered_melt_vcf]) else NONE_ARRAY_,
+      clustered_melt_vcf_indexes=if defined(clustered_manta_vcf) then select_all([clustered_melt_vcf_index]) else NONE_ARRAY_,
+      clustered_scramble_vcfs=if defined(clustered_manta_vcf) then select_all([clustered_scramble_vcf]) else NONE_ARRAY_,
+      clustered_scramble_vcf_indexes=if defined(clustered_manta_vcf) then select_all([clustered_scramble_vcf_index]) else NONE_ARRAY_,
+      clustered_wham_vcfs=if defined(clustered_manta_vcf) then select_all([clustered_wham_vcf]) else NONE_ARRAY_,
+      clustered_wham_vcf_indexes=if defined(clustered_manta_vcf) then select_all([clustered_wham_vcf_index]) else NONE_ARRAY_,
+      clustered_depth_vcfs=if defined(clustered_manta_vcf) then select_all([clustered_depth_vcf]) else NONE_ARRAY_,
+      clustered_depth_vcf_indexes=if defined(clustered_manta_vcf) then select_all([clustered_depth_vcf_index]) else NONE_ARRAY_,
       ped_file=ped_file,
       contig_list=contig_list,
       reference_fasta=reference_fasta,
