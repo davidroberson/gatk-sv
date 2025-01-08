@@ -39,8 +39,11 @@ def make_paired_bnd_records(record, ref_fasta):
     chr2 = record.info['CHR2']
     if 'END2' in record.info.keys():
         end2 = record.info['END2']
-    elif record.contig == record.info['CHR2']:
-        end2 = record.pos + record.info.get('SVLEN', 0)
+    elif record.contig == record.info['CHR2'] and 'SVLEN' in record.info.keys():
+        end2 = record.pos + record.info['SVLEN']
+    else:
+        raise ValueError("BND record must contain END2 or if it is intrachromosomal then SVLEN, "
+                         f"but {record.id} contains neither")
 
     orig_id = record.id
     new_id = orig_id + "_M1"
