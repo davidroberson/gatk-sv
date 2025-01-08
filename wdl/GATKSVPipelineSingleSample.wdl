@@ -1368,113 +1368,31 @@ workflow GATKSVPipelineSingleSample {
       sv_pipeline_docker=sv_pipeline_docker
   }
 
-  call SingleSampleMetrics.SingleSampleMetrics as SampleFilterMetrics {
-    input:
-      name = batch,
-      ref_samples = ref_samples,
-      case_sample = sample_id,
-      wgd_scores = EvidenceQC.WGD_scores,
-      sample_counts = case_counts_file_,
-      contig_list = primary_contigs_list,
-      linux_docker = linux_docker,
-      sv_pipeline_docker = sv_pipeline_docker
-  }
-
-  call utils.RunQC as SampleFilterQC {
-    input:
-      name=batch,
-      metrics=SampleFilterMetrics.metrics_file,
-      qc_definitions = qc_definitions,
-      sv_pipeline_docker=sv_pipeline_docker
-  }
-
-  call SingleSampleFiltering.SampleQC as FilterSample {
-    input:
-      vcf=FilterVcfWithReferencePanelCalls.out,
-      sample_filtering_qc_file=SampleFilterQC.out,
-      sv_pipeline_docker=sv_pipeline_docker,
-  }
-
-  call annotate.AnnotateVcf {
-       input:
-        vcf = FilterSample.out,
-        prefix = batch,
-        contig_list = primary_contigs_list,
-        protein_coding_gtf = protein_coding_gtf,
-        noncoding_bed = noncoding_bed,
-        promoter_window = promoter_window,
-        max_breakend_as_cnv_length = max_breakend_as_cnv_length,
-        external_af_ref_bed = external_af_ref_bed,
-        external_af_ref_prefix = external_af_ref_bed_prefix,
-        external_af_population = external_af_population,
-        use_hail = false,
-        sv_per_shard = annotation_sv_per_shard,
-        sv_base_mini_docker = sv_base_mini_docker,
-        sv_pipeline_docker = sv_pipeline_docker,
-        gatk_docker = gatk_docker,
-        runtime_attr_svannotate = runtime_attr_svannotate
-  }
-
-  call SingleSampleFiltering.VcfToBed as VcfToBed {
-    input:
-      vcf = AnnotateVcf.annotated_vcf,
-      prefix = batch,
-      sv_pipeline_docker = sv_pipeline_docker
-  }
-
-  call SingleSampleFiltering.UpdateBreakendRepresentation {
-    input:
-      vcf=AnnotateVcf.annotated_vcf,
-      vcf_idx=AnnotateVcf.annotated_vcf_index,
-      ref_fasta=reference_fasta,
-      ref_fasta_idx=reference_index,
-      prefix=basename(AnnotateVcf.annotated_vcf, ".vcf.gz") + ".final_cleanup",
-      sv_pipeline_docker=sv_pipeline_docker
-  }
-
-  call SingleSampleMetrics.SingleSampleMetrics {
-    input:
-      name = batch,
-      ref_samples = ref_samples,
-      case_sample = sample_id,
-      wgd_scores = EvidenceQC.WGD_scores,
-      sample_pe = case_pe_file_,
-      sample_sr = case_sr_file_,
-      sample_counts = case_counts_file_,
-      cleaned_vcf = MakeCohortVcf.vcf,
-      final_vcf = UpdateBreakendRepresentation.out,
-      genotyped_pesr_vcf = ConvertCNVsWithoutDepthSupportToBNDs.out_vcf,
-      genotyped_depth_vcf = GenotypeBatch.genotyped_depth_vcf,
-      non_genotyped_unique_depth_calls_vcf = GetUniqueNonGenotypedDepthCalls.out,
-      contig_list = primary_contigs_list,
-      linux_docker = linux_docker,
-      sv_pipeline_docker = sv_pipeline_docker
-  }
-
-  call utils.RunQC as SingleSampleQC {
-    input:
-      name = batch,
-      metrics = SingleSampleMetrics.metrics_file,
-      qc_definitions = qc_definitions,
-      sv_pipeline_docker = sv_pipeline_docker
-  }
-
   output {
-    File final_vcf = UpdateBreakendRepresentation.out
-    File final_vcf_idx = UpdateBreakendRepresentation.out_idx
+    File filter_with_ref_panel_vcf =  FilterVcfWithReferencePanelCalls.out
+    File ped_file_out = combined_ped_file
 
-    File final_bed = VcfToBed.bed
+    # RefineComplexVariants
+    File samples_list = SamplesList.samples_file
+    File PE_matrix = GatherBatchEvidence.merged_PE
+    File PE_matrix_index = GatherBatchEvidence.merged_PE_index
+    File Depth_DEL_bed = MergeSetDel.out
+    File Depth_DUP_bed = MergeSetDup.out
 
-    # These files contain events reported in the internal VCF representation
-    # They are less VCF-spec compliant but may be useful if components of the pipeline need to be re-run
-    # on the output.
-    File pre_cleanup_vcf = AnnotateVcf.annotated_vcf
-    File pre_cleanup_vcf_idx = AnnotateVcf.annotated_vcf_index
+    # JoinRawCalls
+    File? clustered_manta_vcf = ClusterBatch.clustered_manta_vcf
+    File? clustered_manta_vcf_index = ClusterBatch.clustered_manta_vcf_index
+    File? clustered_melt_vcf = ClusterBatch.clustered_melt_vcf
+    File? clustered_melt_vcf_index = ClusterBatch.clustered_melt_vcf_index
+    File? clustered_scramble_vcf = ClusterBatch.clustered_scramble_vcf
+    File? clustered_scramble_vcf_index = ClusterBatch.clustered_scramble_vcf_index
+    File? clustered_wham_vcf = ClusterBatch.clustered_wham_vcf
+    File? clustered_wham_vcf_index = ClusterBatch.clustered_wham_vcf_index
+    File? clustered_depth_vcf = ClusterBatch.clustered_depth_vcf
+    File? clustered_depth_vcf_index = ClusterBatch.clustered_depth_vcf_index
 
     File ploidy_matrix = select_first([GatherBatchEvidence.batch_ploidy_matrix])
     File ploidy_plots = select_first([GatherBatchEvidence.batch_ploidy_plots])
-    File metrics_file = SingleSampleMetrics.metrics_file
-    File qc_file = SingleSampleQC.out
 
     # These files contain any depth based calls made in the case sample that did not pass genotyping
     # in the case sample and do not match a depth-based call from the reference panel.
