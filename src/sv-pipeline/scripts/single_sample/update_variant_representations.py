@@ -40,7 +40,7 @@ def make_paired_bnd_records(record, ref_fasta):
     if 'END2' in record.info.keys():
         end2 = record.info['END2']
     elif record.contig == record.info['CHR2']:
-        end2 = record.pos + record.info['SVLEN']
+        end2 = record.pos + record.info.get('SVLEN', 0)
 
     orig_id = record.id
     new_id = orig_id + "_M1"
@@ -54,7 +54,8 @@ def make_paired_bnd_records(record, ref_fasta):
     record.info.pop('CHR2')
     if 'END2' in record.info.keys():
         record.info.pop('END2')
-    record.info.pop('SVLEN')
+    if 'SVLEN' in record.info:
+        record.info.pop('SVLEN')
 
     mate_record = record.copy()
     mate_record.id = mate_id
@@ -131,7 +132,8 @@ def make_reciprocal_translocation_bnds(record, ref_fasta):
     record.info['EVENT'] = event_id
     record.info['SVTYPE'] = 'BND'
     record.info.pop('CHR2')
-    record.info.pop('SVLEN')
+    if 'SVLEN' in record.info:
+        record.info.pop('SVLEN')
 
     m1 = record.copy()
     m1.id = m1_id
