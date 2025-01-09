@@ -48,11 +48,16 @@ workflow GATKSVPipelineSingleSamplePart2 {
     Boolean run_main_vcf_qc = true
 
     # Downstream steps
-    File ref_samples_list
     File wgd_scores
     File case_counts_file
     File case_pe_file
     File case_sr_file
+
+    File convert_cnvs_without_depth_support_vcf
+    File genotyped_depth_vcf
+    File non_genotyped_unique_depth_calls_vcf
+
+    File ref_samples_list
     File qc_definitions
 
     File protein_coding_gtf
@@ -64,10 +69,6 @@ workflow GATKSVPipelineSingleSamplePart2 {
     File? external_af_ref_bed             # bed file with population AFs for annotation
     String? external_af_ref_bed_prefix    # name of external AF bed file call set
     Array[String]? external_af_population # populations to annotate external AFs (required if ref_bed set, use "ALL" for all)
-
-    File convert_cnvs_without_depth_support_vcf
-    File genotyped_depth_vcf
-    File non_genotyped_unique_depth_calls_vcf
 
     # Reference genome
     String? chr_x

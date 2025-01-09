@@ -1391,6 +1391,14 @@ workflow GATKSVPipelineSingleSample {
     File? clustered_depth_vcf = ClusterBatch.clustered_depth_vcf
     File? clustered_depth_vcf_index = ClusterBatch.clustered_depth_vcf_index
 
+    File wgd_scores = EvidenceQC.WGD_scores
+    File case_counts_file_out = case_counts_file_
+    File case_pe_file_out = case_pe_file_
+    File case_sr_file_out = case_sr_file_
+
+    File convert_cnvs_without_depth_support_vcf = ConvertCNVsWithoutDepthSupportToBNDs.out_vcf
+    File genotyped_depth_vcf = GenotypeBatch.genotyped_depth_vcf
+
     File ploidy_matrix = select_first([GatherBatchEvidence.batch_ploidy_matrix])
     File ploidy_plots = select_first([GatherBatchEvidence.batch_ploidy_plots])
 
