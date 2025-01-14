@@ -347,8 +347,6 @@ task RDTestGenotype {
       tabix -p bed local.RD.txt.gz
     fi
 
-
-
     Rscript /opt/RdTest/RdTest.R \
       -b ~{bed} \
       -c local.RD.txt.gz \
