@@ -9,8 +9,6 @@ slug: build_ref_panel
 
 The [single-sample mode](/docs/gs/calling_modes#single-sample-mode) requires a reference panel of samples. GATK-SV provides a default reference panel described [here](/docs/execution/single#reference-panel). However, users may wish to generate new reference panels. The panel samples should be chosen using the same criteria as [joint calling batching](/docs/modules/eqc#batching), i.e. even sex balance and similar depth, WGD score, insert size, aligner, etc. with respect to each other and with respect to all samples that will be called in single-sample mode.
 
-## With Terra
-
 ### Run joint calling
 
 First run the new reference panel samples through the [joint calling Terra workspace](https://app.terra.bio/#workspaces/broad-firecloud-dsde-methods/GATK-Structural-Variants-Joint-Calling). All numbered workflows must be run. Refer to the [joint calling documentation](/docs/execution/joint) for further instructions. Optional workflows without numbers do not need to be run.
@@ -103,75 +101,3 @@ Now we will configure a Terra workspace with the reference panel in the followin
 7. Update the inputs with the `GATKSVPipelineSingleSample.json` file built in the last step, either by clicking `upload json` or dragging and dropping it in to your browser. 
 8. Click `Save` to commit the update.
 
-## With Cromwell
-
-### Run GATKSVPipelineBatch
-
-:::warning
-This method is deprecated but provided for legacy users.
-:::
-
-Another method to generate a new reference panel is with the [GATKSVPipelineBatch](https://github.com/broadinstitute/gatk-sv/blob/main/wdl/GATKSVPipelineBatch.wdl) workflow. 
-This must be run on a standalone Cromwell server, as this particular workflow is unstable on Terra.
-
-We recommend copying the outputs from a Cromwell run to a permanent location by adding the following option to 
-the workflow configuration file:
-```
-  "final_workflow_outputs_dir" : "gs://my-outputs-bucket",
-  "use_relative_output_paths": false,
-```
-
-### Create input jsons
-
-Here is an example of how to generate workflow input jsons from `GATKSVPipelineBatch` workflow metadata:
-
-1. Get metadata from Cromwshell.
-
-   ```shell
-    cromshell -t60 metadata 38c65ca4-2a07-4805-86b6-214696075fef > metadata.json
-   ```
-
-2. Run the script.
-
-   ```shell
-   > python scripts/inputs/create_test_batch.py \
-      --execution-bucket gs://my-exec-bucket \
-      --final-workflow-outputs-dir gs://my-outputs-bucket \
-      metadata.json \
-      > inputs/values/my_ref_panel.json
-   ```
-
-3. Build test files for batched workflows (google cloud project id required).
-
-   ```shell
-   > python scripts/inputs/build_inputs.py \
-      inputs/values \
-      inputs/templates/test \
-      inputs/build/my_ref_panel/test \
-      -a '{ "test_batch" : "ref_panel_1kg" }'
-   ```
-
-4. Build test files for the single-sample workflow
-
-   ```shell
-   > python scripts/inputs/build_inputs.py \
-       inputs/values \
-       inputs/templates/test/GATKSVPipelineSingleSample \
-       inputs/build/NA19240/test_my_ref_panel \
-       -a '{ "single_sample" : "test_single_sample_NA19240", "ref_panel" : "my_ref_panel" }'
-   ```
-
-5. Build files for a Terra workspace.
-
-   ```shell 
-   > python scripts/inputs/build_inputs.py \
-      inputs/values \
-      inputs/templates/terra_workspaces/single_sample \
-      inputs/build/NA12878/terra_my_ref_panel \
-      -a '{ "single_sample" : "test_single_sample_NA12878", "ref_panel" : "my_ref_panel" }'
-   ```
-
-6. Refer to [this section](#configure-terra) on configuring a Terra workspace.
-
-Note that the inputs to `GATKSVPipelineBatch` may be used as resources
-for the reference panel and therefore should also be in a permanent location.
