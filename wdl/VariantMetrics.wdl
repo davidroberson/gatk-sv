@@ -4,10 +4,10 @@ import "Structs.wdl"
 
 workflow VariantMetrics {
     input {
-        Array[File] manta_vcfs
-        Array[File] melt_vcfs
-        Array[File] wham_vcfs
-        Array[File] scramble_vcfs
+        Array[File]? manta_vcfs
+        Array[File]? melt_vcfs
+        Array[File]? wham_vcfs
+        Array[File]? scramble_vcfs
         Array[String] samples
         String prefix
         String sv_pipeline_docker
@@ -20,10 +20,10 @@ workflow VariantMetrics {
         call CountVariants {
             input:
                 sample_id = samples[i],
-                manta_vcf = manta_vcfs[i],
-                melt_vcf = melt_vcfs[i],
-                wham_vcf = wham_vcfs[i],
-                scramble_vcf = scramble_vcfs[i],
+                manta_vcf = if defined(manta_vcfs) then manta_vcfs[i] else None,
+                melt_vcf = if defined(melt_vcfs) then melt_vcfs[i] else None,
+                wham_vcf = if defined(wham_vcfs) then wham_vcfs[i] else None,
+                scramble_vcf = if defined(scramble_vcfs) then scramble_vcfs[i] else None,
                 sv_pipeline_docker = sv_pipeline_docker,
                 runtime_attr_override = runtime_attr_count
         }
@@ -46,10 +46,10 @@ workflow VariantMetrics {
 task CountVariants {
     input {
         String sample_id
-        File manta_vcf
-        File melt_vcf
-        File wham_vcf
-        File scramble_vcf
+        File? manta_vcf
+        File? melt_vcf
+        File? wham_vcf
+        File? scramble_vcf
         String sv_pipeline_docker
         RuntimeAttr? runtime_attr_override
     }
@@ -106,19 +106,14 @@ with open(output, 'w') as out:
 CODE
         }
 
-        # Process each caller's VCF
-        process_vcf ~{manta_vcf} "manta" "manta_counts.txt"
-        process_vcf ~{melt_vcf} "melt" "melt_counts.txt"
-        process_vcf ~{wham_vcf} "wham" "wham_counts.txt"
-        process_vcf ~{scramble_vcf} "scramble" "scramble_counts.txt"
-
-        # Combine all counts into one file with sample ID
+        # Initialize output file with header
         echo -e "sample_id\tmetric\tcount" > ~{sample_id}.variant_counts.txt
-        for f in *_counts.txt; do
-            while read -r metric count; do
-                echo -e "~{sample_id}\t$metric\t$count"
-            done < $f >> ~{sample_id}.variant_counts.txt
-        done
+
+        # Process each caller's VCF if provided
+        ~{if defined(manta_vcf) then "process_vcf ~{manta_vcf} 'manta' 'manta_counts.txt' && cat manta_counts.txt | while read -r metric count; do echo -e '~{sample_id}\t'$metric'\t'$count; done >> ~{sample_id}.variant_counts.txt" else ""}
+        ~{if defined(melt_vcf) then "process_vcf ~{melt_vcf} 'melt' 'melt_counts.txt' && cat melt_counts.txt | while read -r metric count; do echo -e '~{sample_id}\t'$metric'\t'$count; done >> ~{sample_id}.variant_counts.txt" else ""}
+        ~{if defined(wham_vcf) then "process_vcf ~{wham_vcf} 'wham' 'wham_counts.txt' && cat wham_counts.txt | while read -r metric count; do echo -e '~{sample_id}\t'$metric'\t'$count; done >> ~{sample_id}.variant_counts.txt" else ""}
+        ~{if defined(scramble_vcf) then "process_vcf ~{scramble_vcf} 'scramble' 'scramble_counts.txt' && cat scramble_counts.txt | while read -r metric count; do echo -e '~{sample_id}\t'$metric'\t'$count; done >> ~{sample_id}.variant_counts.txt" else ""}
     >>>
 
     runtime {
