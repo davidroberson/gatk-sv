@@ -69,63 +69,23 @@ task CountVariants {
         set -euo pipefail
 
         # Function to process each VCF and output counts
-        process_vcf() {
-            local vcf=$1
-            local caller=$2
-            local output=$3
-
-            # Count variants by type and chromosome
-            python <<CODE
-import gzip
-
-def get_info_field(info_str, field):
-    for item in info_str.split(';'):
-        if '=' in item and item.split('=')[0] == field:
-            return item.split('=')[1]
-    return None
-
-counts = {}
-with gzip.open('${vcf}', 'rt') as f:
-    for line in f:
-        if line.startswith('#'):
-            continue
-        fields = line.strip().split('\t')
-        chrom = fields[0]
-        info = fields[7]
-        svtype = get_info_field(info, 'SVTYPE')
-        if svtype:
-            key = f"{caller}_{svtype}_{chrom}"
-            counts[key] = counts.get(key, 0) + 1
-
-with open(output, 'w') as out:
-    for key, count in sorted(counts.items()):
-        out.write(f"{key}\t{count}\n")
-CODE
-        }
-
         # Initialize output file with header
         echo -e "sample_id\tmetric\tcount" > ~{sample_id}.variant_counts.txt
 
         # Process each caller's VCF if provided
         if [ -f "~{default="" manta_vcf}" ]; then
-            process_vcf ~{manta_vcf} "manta" "manta_counts.txt" 
-            cat manta_counts.txt | while read -r metric count; do 
-                echo -e "~{sample_id}\t$metric\t$count"
-            done >> ~{sample_id}.variant_counts.txt
+            python /opt/sv-pipeline/pre_SVCalling_and_QC/raw_vcf_qc/calcu_num_SVs.by_type_chromo.py ~{manta_vcf} manta_counts.txt
+            awk 'NR > 1 { print "~{sample_id}\t" "manta_"$2"_"$1 "\t" $3 }' manta_counts.txt >> ~{sample_id}.variant_counts.txt
         fi
 
         if [ -f "~{default="" wham_vcf}" ]; then
-            process_vcf ~{wham_vcf} "wham" "wham_counts.txt"
-            cat wham_counts.txt | while read -r metric count; do 
-                echo -e "~{sample_id}\t$metric\t$count"
-            done >> ~{sample_id}.variant_counts.txt
+            python /opt/sv-pipeline/pre_SVCalling_and_QC/raw_vcf_qc/calcu_num_SVs.by_type_chromo.py ~{wham_vcf} wham_counts.txt
+            awk 'NR > 1 { print "~{sample_id}\t" "wham_"$2"_"$1 "\t" $3 }' wham_counts.txt >> ~{sample_id}.variant_counts.txt
         fi
 
         if [ -f "~{default="" scramble_vcf}" ]; then
-            process_vcf ~{scramble_vcf} "scramble" "scramble_counts.txt"
-            cat scramble_counts.txt | while read -r metric count; do 
-                echo -e "~{sample_id}\t$metric\t$count"
-            done >> ~{sample_id}.variant_counts.txt
+            python /opt/sv-pipeline/pre_SVCalling_and_QC/raw_vcf_qc/calcu_num_SVs.by_type_chromo.py ~{scramble_vcf} scramble_counts.txt
+            awk 'NR > 1 { print "~{sample_id}\t" "scramble_"$2"_"$1 "\t" $3 }' scramble_counts.txt >> ~{sample_id}.variant_counts.txt
         fi
     >>>
 
