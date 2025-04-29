@@ -20,10 +20,10 @@ workflow VariantMetrics {
         call CountVariants {
             input:
                 sample_id = samples[i],
-                manta_vcf = if defined(manta_vcfs) then select_first([manta_vcfs])[i] else "",
-                melt_vcf = if defined(melt_vcfs) then select_first([melt_vcfs])[i] else "",
-                wham_vcf = if defined(wham_vcfs) then select_first([wham_vcfs])[i] else "",
-                scramble_vcf = if defined(scramble_vcfs) then select_first([scramble_vcfs])[i] else "",
+                manta_vcf = if defined(manta_vcfs) then select_first([manta_vcfs])[i] else None,
+                melt_vcf = if defined(melt_vcfs) then select_first([melt_vcfs])[i] else None,
+                wham_vcf = if defined(wham_vcfs) then select_first([wham_vcfs])[i] else None,
+                scramble_vcf = if defined(scramble_vcfs) then select_first([scramble_vcfs])[i] else None,
                 sv_pipeline_docker = sv_pipeline_docker,
                 runtime_attr_override = runtime_attr_count
         }
@@ -46,10 +46,10 @@ workflow VariantMetrics {
 task CountVariants {
     input {
         String sample_id
-        String manta_vcf = ""
-        String melt_vcf = ""
-        String wham_vcf = ""
-        String scramble_vcf = ""
+        File? manta_vcf
+        File? melt_vcf
+        File? wham_vcf
+        File? scramble_vcf
         String sv_pipeline_docker
         RuntimeAttr? runtime_attr_override
     }
@@ -57,7 +57,7 @@ task CountVariants {
     RuntimeAttr default_attr = object {
         cpu_cores: 1,
         mem_gb: 3.75,
-        disk_gb: 10,
+        disk_gb: ceil(10 + size(select_first([manta_vcf, select_first([melt_vcf, select_first([wham_vcf, select_first([scramble_vcf, ""])])])]), "GB") * 2),
         boot_disk_gb: 10,
         preemptible_tries: 3,
         max_retries: 1
@@ -110,28 +110,28 @@ CODE
         echo -e "sample_id\tmetric\tcount" > ~{sample_id}.variant_counts.txt
 
         # Process each caller's VCF if provided
-        if [ -n "~{manta_vcf}" ]; then
+        if [ -f "~{default="" manta_vcf}" ]; then
             process_vcf ~{manta_vcf} "manta" "manta_counts.txt" 
             cat manta_counts.txt | while read -r metric count; do 
                 echo -e "~{sample_id}\t$metric\t$count"
             done >> ~{sample_id}.variant_counts.txt
         fi
 
-        if [ -n "~{melt_vcf}" ]; then
+        if [ -f "~{default="" melt_vcf}" ]; then
             process_vcf ~{melt_vcf} "melt" "melt_counts.txt"
             cat melt_counts.txt | while read -r metric count; do 
                 echo -e "~{sample_id}\t$metric\t$count"
             done >> ~{sample_id}.variant_counts.txt
         fi
 
-        if [ -n "~{wham_vcf}" ]; then
+        if [ -f "~{default="" wham_vcf}" ]; then
             process_vcf ~{wham_vcf} "wham" "wham_counts.txt"
             cat wham_counts.txt | while read -r metric count; do 
                 echo -e "~{sample_id}\t$metric\t$count"
             done >> ~{sample_id}.variant_counts.txt
         fi
 
-        if [ -n "~{scramble_vcf}" ]; then
+        if [ -f "~{default="" scramble_vcf}" ]; then
             process_vcf ~{scramble_vcf} "scramble" "scramble_counts.txt"
             cat scramble_counts.txt | while read -r metric count; do 
                 echo -e "~{sample_id}\t$metric\t$count"
@@ -161,7 +161,7 @@ task MergeCounts {
     RuntimeAttr default_attr = object {
         cpu_cores: 1,
         mem_gb: 3.75,
-        disk_gb: 10,
+        disk_gb: ceil(10 + size(count_files, "GB") * 2),
         boot_disk_gb: 10,
         preemptible_tries: 3,
         max_retries: 1
