@@ -5,7 +5,6 @@ import "Structs.wdl"
 workflow VariantMetrics {
     input {
         Array[File]? manta_vcfs
-        Array[File]? melt_vcfs
         Array[File]? wham_vcfs
         Array[File]? scramble_vcfs
         Array[String] samples
@@ -21,7 +20,6 @@ workflow VariantMetrics {
             input:
                 sample_id = samples[i],
                 manta_vcf = select_first([manta_vcfs])[i],
-                melt_vcf = select_first([melt_vcfs])[i],
                 wham_vcf = select_first([wham_vcfs])[i],
                 scramble_vcf = select_first([scramble_vcfs])[i],
                 sv_pipeline_docker = sv_pipeline_docker,
@@ -47,7 +45,6 @@ task CountVariants {
     input {
         String sample_id
         File? manta_vcf
-        File? melt_vcf
         File? wham_vcf
         File? scramble_vcf
         String sv_pipeline_docker
@@ -57,7 +54,7 @@ task CountVariants {
     RuntimeAttr default_attr = object {
         cpu_cores: 1,
         mem_gb: 3.75,
-        disk_gb: ceil(10 + size(select_first([manta_vcf, select_first([melt_vcf, select_first([wham_vcf, select_first([scramble_vcf, ""])])])]), "GB") * 2),
+        disk_gb: ceil(10 + size(select_first([manta_vcf, wham_vcf, scramble_vcf], "GB") * 2)),
         boot_disk_gb: 10,
         preemptible_tries: 3,
         max_retries: 1
@@ -113,13 +110,6 @@ CODE
         if [ -f "~{default="" manta_vcf}" ]; then
             process_vcf ~{manta_vcf} "manta" "manta_counts.txt" 
             cat manta_counts.txt | while read -r metric count; do 
-                echo -e "~{sample_id}\t$metric\t$count"
-            done >> ~{sample_id}.variant_counts.txt
-        fi
-
-        if [ -f "~{default="" melt_vcf}" ]; then
-            process_vcf ~{melt_vcf} "melt" "melt_counts.txt"
-            cat melt_counts.txt | while read -r metric count; do 
                 echo -e "~{sample_id}\t$metric\t$count"
             done >> ~{sample_id}.variant_counts.txt
         fi
