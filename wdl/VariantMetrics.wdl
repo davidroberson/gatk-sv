@@ -54,7 +54,7 @@ task CountVariants {
     RuntimeAttr default_attr = object {
         cpu_cores: 1,
         mem_gb: 3.75,
-        disk_gb: ceil(10 + size(select_first([manta_vcf, wham_vcf, scramble_vcf], "GB") * 2)),
+        disk_gb: ceil(10 + size(select_first([manta_vcf, wham_vcf, scramble_vcf]), "GB") * 2),
         boot_disk_gb: 10,
         preemptible_tries: 3,
         max_retries: 1
