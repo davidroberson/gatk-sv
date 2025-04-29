@@ -20,10 +20,10 @@ workflow VariantMetrics {
         call CountVariants {
             input:
                 sample_id = samples[i],
-                manta_vcf = if defined(manta_vcfs) then select_first([manta_vcfs])[i] else None,
-                melt_vcf = if defined(melt_vcfs) then select_first([melt_vcfs])[i] else None,
-                wham_vcf = if defined(wham_vcfs) then select_first([wham_vcfs])[i] else None,
-                scramble_vcf = if defined(scramble_vcfs) then select_first([scramble_vcfs])[i] else None,
+                manta_vcf = select_first([manta_vcfs])[i],
+                melt_vcf = select_first([melt_vcfs])[i],
+                wham_vcf = select_first([wham_vcfs])[i],
+                scramble_vcf = select_first([scramble_vcfs])[i],
                 sv_pipeline_docker = sv_pipeline_docker,
                 runtime_attr_override = runtime_attr_count
         }
