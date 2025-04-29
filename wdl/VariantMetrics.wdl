@@ -125,15 +125,20 @@ task MergeCounts {
     command <<<
         set -euo pipefail
 
+        # Write the list of count files to a file
+        echo "~{sep='\n' count_files}" > count_files.list
+
         # Merge all count files and pivot to create final TSV
         python <<CODE
 import pandas as pd
 
-# Read all count files
+# Read all count files from the list file
 dfs = []
-for f in '~{sep="' '" count_files}'.split():
-    df = pd.read_csv(f, sep='\t')
-    dfs.append(df)
+with open('count_files.list', 'r') as f:
+    for line in f:
+        file_path = line.strip()
+        df = pd.read_csv(file_path, sep='\t')
+        dfs.append(df)
 
 # Combine all dataframes
 combined = pd.concat(dfs, ignore_index=True)
