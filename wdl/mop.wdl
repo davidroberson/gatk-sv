@@ -13,7 +13,8 @@ workflow Mop {
             workspace_namespace = workspace_namespace,
             workspace_name = workspace_name,
             user = user,
-            dry_run = dry_run
+            dry_run = dry_run,
+            automop_docker = automop_docker
     }
 }
 
