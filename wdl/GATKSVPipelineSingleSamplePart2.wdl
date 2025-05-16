@@ -45,7 +45,7 @@ workflow GATKSVPipelineSingleSamplePart2 {
     Float no_call_rate_cutoff = 0.05  # Set to 1 to disable NCR filtering
     String sl_filter_args  # Explicitly set SL cutoffs. See apply_sl_filter.py for arguments.
 
-    Boolean run_main_vcf_qc = true
+    Boolean run_main_vcf_qc = false
 
     # Downstream steps
     File wgd_scores
