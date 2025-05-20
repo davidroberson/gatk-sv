@@ -1,0 +1,26 @@
+# Structs.yml - Common type definitions for GATK-SV pipeline
+
+# Runtime attributes for tasks
+class: SchemaDefRequirement
+types:
+  - name: RuntimeAttr
+    type: record
+    fields:
+      - name: mem_gb
+        type: float?
+        doc: "Memory to allocate in GB"
+      - name: disk_gb
+        type: float?
+        doc: "Disk space to allocate in GB"
+      - name: cpu_cores
+        type: int?
+        doc: "Number of CPU cores to allocate"
+      - name: preemptible_tries
+        type: int?
+        doc: "Number of preemptible attempts"
+      - name: max_retries
+        type: int?
+        doc: "Maximum number of retries"
+      - name: boot_disk_gb
+        type: int?
+        doc: "Boot disk size in GB"
